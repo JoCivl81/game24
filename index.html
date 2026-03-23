@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game 24 Pro</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, sans-serif;
+  background: #eef2f7;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+.container { width: 100%; max-width: 480px; text-align: center; }
+h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
+
+/* ── Name Screen ── */
+#nameScreen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 85vh; gap: 16px;
+}
+#nameScreen h2 { font-size: 28px; }
+.name-sub { color: #888; font-size: 14px; margin-top: -8px; }
+#nameInput {
+  width: 100%; padding: 14px 16px; font-size: 17px;
+  border-radius: 12px; border: 1px solid #ccc;
+  background: white; outline: none;
+  transition: border-color 0.2s;
+}
+#nameInput:focus { border-color: #2196F3; }
+.btn-start {
+  width: 100%; padding: 14px; font-size: 17px; font-weight: 700;
+  background: #2196F3; color: white; border: none;
+  border-radius: 12px; cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-start:hover  { opacity: 0.9; }
+.btn-start:active { transform: scale(0.98); }
+
+/* ── Game Screen ── */
+#gameScreen { display: none; }
+
+.top-bar {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 10px;
+}
+.player-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: white; border: 1px solid #ddd;
+  border-radius: 99px; padding: 5px 12px 5px 6px;
+  font-size: 13px; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  transition: border-color 0.2s;
+}
+.player-pill:hover { border-color: #2196F3; }
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #2196F3; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.lb-btn {
+  background: white; border: 1px solid #ddd;
+  border-radius: 10px; padding: 7px 14px;
+  font-size: 13px; color: #555; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  transition: border-color 0.2s;
+}
+.lb-btn:hover { border-color: #2196F3; color: #2196F3; }
+
+/* diff tabs */
+.diff-tabs {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 6px; margin-bottom: 12px;
+}
+.tab {
+  padding: 9px 6px; border-radius: 10px; font-size: 13px;
+  font-weight: 600; text-align: center; cursor: pointer;
+  border: 1px solid #ddd; background: white; color: #999;
+  transition: all 0.2s;
+}
+.tab.active-easy   { background: #e8f9ef; border-color: #4CAF50; color: #2e7d32; }
+.tab.active-medium { background: #fff8e1; border-color: #FF9800; color: #e65100; }
+.tab.active-hard   { background: #fdecea; border-color: #f44336; color: #c62828; }
+
+/* stats */
+.stats-row {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 8px; margin-bottom: 12px;
+}
+.timer-wrap { position: relative; width: 62px; height: 62px; flex-shrink: 0; }
+.timer-wrap svg { transform: rotate(-90deg); }
+.timer-bg  { fill: none; stroke: #e0e0e0; stroke-width: 5; }
+.timer-arc { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.4s; }
+.timer-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 700; transition: color 0.4s;
+}
+.stat-card {
+  flex: 1; background: white; border-radius: 10px;
+  padding: 7px 10px; text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.stat-card .lbl { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-card .val { font-size: 22px; font-weight: 700; color: #2196F3; line-height: 1.15; }
+
+/* number cards */
+.numbers {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 10px; margin-bottom: 14px;
+}
+.card {
+  aspect-ratio: 3/4; background: white; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(32px, 9vw, 48px); font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+}
+.card.win     { background: #c8f7c5; transform: scale(1.07); }
+.card.shake   { animation: shake 0.35s; }
+.card.timeout { background: #ffe5e5; }
+.card.urgent  { animation: pulse-card 0.5s infinite alternate; }
+@keyframes shake {
+  0%{transform:translateX(0)} 25%{transform:translateX(-7px)}
+  50%{transform:translateX(7px)} 75%{transform:translateX(-7px)} 100%{transform:translateX(0)}
+}
+@keyframes pulse-card {
+  from { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  to   { box-shadow: 0 4px 20px rgba(244,67,54,0.45); }
+}
+
+/* input */
+input.answer {
+  width: 100%; padding: 13px 16px; font-size: 16px;
+  border-radius: 10px; border: 1px solid #ccc; background: white;
+  margin: 4px 0 10px; outline: none; transition: border-color 0.2s;
+}
+input.answer:focus { border-color: #2196F3; }
+
+/* buttons */
+.btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+button.action {
+  padding: 13px 8px; font-size: 15px; font-weight: 600;
+  border: none; border-radius: 10px; color: white;
+  cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+}
+button.action:hover  { opacity: 0.88; }
+button.action:active { transform: scale(0.97); }
+.btn-check    { background: #4CAF50; }
+.btn-next     { background: #2196F3; }
+.btn-solution { background: #FF9800; }
+
+#result { margin-top: 11px; font-size: 19px; font-weight: 600; min-height: 27px; }
+
+/* howto */
+.howto {
+  background: white; border-radius: 12px;
+  padding: 12px 16px; margin-top: 16px;
+  text-align: left; font-size: 12.5px; color: #666;
+  line-height: 1.7; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.howto strong { color: #333; }
+.howto .ex {
+  font-family: monospace; background: #f4f4f4;
+  padding: 1px 6px; border-radius: 4px; font-size: 12px; color: #1565c0;
+}
+
+/* ── Leaderboard Modal ── */
+#lbModal {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+#lbModal.open { display: flex; }
+.lb-panel {
+  background: #f5f7fa; border-radius: 20px; width: 100%;
+  max-width: 440px; padding: 22px;
+  max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.lb-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.lb-title { font-size: 19px; font-weight: 700; }
+.close-btn {
+  background: #e8e8e8; border: none; color: #666;
+  width: 32px; height: 32px; border-radius: 8px;
+  font-size: 18px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.close-btn:hover { background: #ddd; }
+.lb-tabs {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 14px;
+}
+.lb-tab {
+  padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  text-align: center; cursor: pointer; border: 1px solid #ddd;
+  background: white; color: #999; transition: all 0.2s;
+}
+.lb-tab.sel-easy   { background: #e8f9ef; border-color: #4CAF50; color: #2e7d32; }
+.lb-tab.sel-medium { background: #fff8e1; border-color: #FF9800; color: #e65100; }
+.lb-tab.sel-hard   { background: #fdecea; border-color: #f44336; color: #c62828; }
+
+.lb-list { display: flex; flex-direction: column; gap: 6px; }
+.lb-row {
+  display: flex; align-items: center; gap: 12px;
+  background: white; border-radius: 10px; padding: 10px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.lb-row.lb-you { border: 1.5px solid #2196F3; }
+.lb-rank { font-size: 16px; width: 28px; text-align: center; font-weight: 700; }
+.lb-name { flex: 1; font-size: 14px; font-weight: 600; }
+.lb-score { font-size: 17px; font-weight: 700; color: #2196F3; }
+.lb-empty { color: #aaa; text-align: center; padding: 28px 0; font-size: 14px; }
+
+/* new best banner */
+#newBestBanner {
+  position: fixed; top: 20px; left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: #2196F3; color: white;
+  font-size: 14px; font-weight: 700;
+  padding: 10px 24px; border-radius: 99px;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(33,150,243,0.4);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+}
+#newBestBanner.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Name Screen -->
+  <div id="nameScreen">
+    <div style="font-size:52px">🎯</div>
+    <h2>Game 24 Pro</h2>
+    <p class="name-sub">Use 4 numbers to make 24</p>
+    <input id="nameInput" placeholder="Enter your name to start" maxlength="20"
+           onkeydown="if(event.key==='Enter') startGame()" style="max-width:360px">
+    <button class="btn-start" style="max-width:360px" onclick="startGame()">Let's Play →</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="gameScreen">
+
+    <div class="top-bar">
+      <div class="player-pill" onclick="changePlayer()">
+        <div class="avatar" id="avatarEl">?</div>
+        <span id="playerNameEl">Player</span>
+      </div>
+      <button class="lb-btn" onclick="openLeaderboard()">🏆 Leaderboard</button>
+    </div>
+
+    <div class="diff-tabs">
+      <div class="tab" id="tab-easy"   onclick="setDiff('easy')">Easy<br><span style="font-size:11px;font-weight:400;opacity:0.75">150 s</span></div>
+      <div class="tab" id="tab-medium" onclick="setDiff('medium')">Medium<br><span style="font-size:11px;font-weight:400;opacity:0.75">120 s</span></div>
+      <div class="tab" id="tab-hard"   onclick="setDiff('hard')">Hard<br><span style="font-size:11px;font-weight:400;opacity:0.75">90 s</span></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="timer-wrap">
+        <svg width="62" height="62" viewBox="0 0 62 62">
+          <circle class="timer-bg" cx="31" cy="31" r="25"/>
+          <circle class="timer-arc" id="timerArc" cx="31" cy="31" r="25"/>
+        </svg>
+        <div class="timer-num" id="timerNum">150</div>
+      </div>
+      <div class="stat-card"><div class="lbl">Score</div><div class="val" id="scoreNum">0</div></div>
+      <div class="stat-card"><div class="lbl">Streak</div><div class="val" id="streakNum">0</div></div>
+      <div class="stat-card"><div class="lbl">Best</div><div class="val" id="bestNum">0</div></div>
+    </div>
+
+    <div class="numbers" id="numbers"></div>
+
+    <input class="answer" id="answer" placeholder="e.g. (3+5)*(6-2)"
+           onkeydown="if(event.key==='Enter') check()">
+
+    <div class="btn-row">
+      <button class="action btn-check"    onclick="check()">Check ✓</button>
+      <button class="action btn-next"     onclick="next()">Next →</button>
+      <button class="action btn-solution" onclick="showSolution()">Solve</button>
+    </div>
+
+    <p id="result"></p>
+
+    <div class="howto">
+      <strong>How to play</strong> — Use all <strong>4 numbers</strong> with <strong>+ − × ÷</strong> to make <strong>24</strong>.
+      Each number exactly once. E.g. <span class="ex">(3+5)*(6-2)</span>
+      &nbsp;·&nbsp; ⚡ Faster = more pts &nbsp;·&nbsp; 🔥 Streak ×3 doubles points
+    </div>
+
+  </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div id="lbModal">
+  <div class="lb-panel">
+    <div class="lb-header">
+      <span class="lb-title">🏆 Leaderboard</span>
+      <button class="close-btn" onclick="closeLeaderboard()">×</button>
+    </div>
+    <div class="lb-tabs">
+      <div class="lb-tab" id="lbt-easy"   onclick="setLbDiff('easy')">Easy</div>
+      <div class="lb-tab" id="lbt-medium" onclick="setLbDiff('medium')">Medium</div>
+      <div class="lb-tab" id="lbt-hard"   onclick="setLbDiff('hard')">Hard</div>
+    </div>
+    <div class="lb-list" id="lbList"></div>
+  </div>
+</div>
+
+<div id="newBestBanner">🎊 New Personal Best!</div>
+
+<script>
+let playerName = '';
+let currentDiff = 'easy';
+let pools = { easy:[], medium:[], hard:[] };
+let current = null;
+let poolReady = false;
+let score = 0, streak = 0;
+let timeLeft = 150, timerMax = 150;
+let timerInterval = null;
+let urgentPlaying = false;
+let urgentInterval = null;
+let urgentBeat = 0;
+let lbDiff = 'easy';
+
+const CIRC = 2 * Math.PI * 25;
+const arcEl = document.getElementById('timerArc');
+const timerNumEl = document.getElementById('timerNum');
+arcEl.style.strokeDasharray = CIRC;
+
+// ── Storage ────────────────────────────────────────────
+function loadLB() { try { return JSON.parse(localStorage.getItem('lb24pro')||'{}'); } catch { return {}; } }
+function saveLB(lb) { localStorage.setItem('lb24pro', JSON.stringify(lb)); }
+function getTopScores(d) { return (loadLB()[d]||[]).sort((a,b)=>b.score-a.score).slice(0,10); }
+function getPersonalBest(name,d) { return (loadLB()[d]||[]).find(e=>e.name===name)?.score||0; }
+function submitScore(name,d,s) {
+  let lb=loadLB(); if(!lb[d]) lb[d]=[];
+  let ex=lb[d].find(e=>e.name===name);
+  let isNew=false;
+  if(!ex){ lb[d].push({name,score:s}); isNew=true; }
+  else if(s>ex.score){ ex.score=s; isNew=true; }
+  saveLB(lb); return isNew;
+}
+
+// ── Name / Player ──────────────────────────────────────
+function startGame() {
+  let n = document.getElementById('nameInput').value.trim();
+  if (!n) { document.getElementById('nameInput').focus(); return; }
+  playerName = n;
+  document.getElementById('nameScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('playerNameEl').textContent = n;
+  document.getElementById('avatarEl').textContent = n[0].toUpperCase();
+  setDiff('easy');
+}
+
+function changePlayer() {
+  if (!confirm('Change player? Score will be saved.')) return;
+  saveCurrentScore();
+  score=0; streak=0;
+  document.getElementById('scoreNum').textContent=0;
+  document.getElementById('streakNum').textContent=0;
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('nameScreen').style.display='flex';
+  document.getElementById('nameInput').value='';
+}
+
+function saveCurrentScore() { if(playerName && score>0) submitScore(playerName,currentDiff,score); }
+
+// ── Difficulty ─────────────────────────────────────────
+function setDiff(d) {
+  currentDiff = d;
+  ['easy','medium','hard'].forEach(k => {
+    let t = document.getElementById('tab-'+k);
+    t.className = 'tab' + (k===d ? ' active-'+k : '');
+  });
+  timerMax = d==='easy' ? 150 : d==='medium' ? 120 : 90;
+  score=0; streak=0;
+  document.getElementById('scoreNum').textContent=0;
+  document.getElementById('streakNum').textContent=0;
+  updateBestDisplay();
+  next();
+}
+
+function updateBestDisplay() {
+  document.getElementById('bestNum').textContent = getPersonalBest(playerName, currentDiff);
+}
+
+// ── Timer ──────────────────────────────────────────────
+function timerColor(t, max) {
+  if (t/max > 0.4) return '#4CAF50';
+  if (t/max > 0.2) return '#FF9800';
+  return '#f44336';
+}
+function setTimerDisplay(t) {
+  arcEl.style.strokeDashoffset = CIRC*(1-t/timerMax);
+  let c = timerColor(t,timerMax);
+  arcEl.style.stroke = c;
+  timerNumEl.textContent = t;
+  timerNumEl.style.color = c;
+}
+function startTimer() {
+  clearInterval(timerInterval);
+  stopUrgent();
+  timeLeft = timerMax;
+  setTimerDisplay(timeLeft);
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    setTimerDisplay(timeLeft);
+    if (timeLeft === Math.floor(timerMax*0.2)) startUrgent();
+    if (timeLeft <= 0) { clearInterval(timerInterval); onTimeout(); }
+  }, 1000);
+}
+function onTimeout() {
+  stopUrgent();
+  streak=0;
+  document.getElementById('streakNum').textContent=0;
+  document.getElementById('result').textContent = '⏰ Time\'s up!';
+  document.querySelectorAll('.card').forEach(c=>{ c.classList.remove('win','urgent'); c.classList.add('timeout'); });
+  playSad();
+}
+
+// ── Audio ──────────────────────────────────────────────
+const actx = new (window.AudioContext||window.webkitAudioContext)();
+
+function tone(freq, type, t0, dur, vol, freqEnd) {
+  let o=actx.createOscillator(), g=actx.createGain();
+  o.connect(g); g.connect(actx.destination);
+  o.type=type; o.frequency.value=freq;
+  if(freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t0+dur);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(vol, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.start(t0); o.stop(t0+dur+0.02);
+}
+
+function playSad() {
+  tone(280,'sawtooth', actx.currentTime, 0.45, 0.25, 90);
+}
+
+function playWin(s) {
+  let t = actx.currentTime;
+  [523,659,784,1047].forEach((f,i) => tone(f,'triangle', t+i*0.09, 0.45, 0.28));
+  [261,329,392].forEach(f => tone(f,'sine', t, 0.6, 0.1));
+  if (s>=3) tone(1600,'sine', t+0.45, 0.4, 0.32, 2800);
+  if (s>=5) {
+    tone(80,'sine', t, 0.2, 0.45, 40);
+    [1047,1319,1568].forEach((f,i) => tone(f,'triangle', t+0.5+i*0.1, 0.1, 0.32));
+  }
+}
+
+function startUrgent() {
+  if (urgentPlaying) return;
+  urgentPlaying = true; urgentBeat = 0;
+  document.querySelectorAll('.card').forEach(c=>c.classList.add('urgent'));
+  urgentInterval = setInterval(()=>{
+    if (!urgentPlaying) return;
+    let t = actx.currentTime;
+    urgentBeat++;
+    // heartbeat thud
+    tone(58,'sine', t,      0.13, 0.5, 44);
+    tone(52,'sine', t+0.16, 0.1,  0.35, 38);
+    // rising tick
+    let pitch = Math.min(300 + urgentBeat*20, 950);
+    tone(pitch,'square', t+0.06, 0.06, 0.07);
+    // accent every 4 beats
+    if (urgentBeat%4===0) tone(pitch*2,'sawtooth', t, 0.07, 0.11);
+  }, 500);
+}
+
+function stopUrgent() {
+  urgentPlaying=false;
+  clearInterval(urgentInterval);
+  urgentBeat=0;
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('urgent'));
+}
+
+// ── Solver ─────────────────────────────────────────────
+function solve(nums) {
+  function helper(arr) {
+    if (arr.length===1) return Math.abs(arr[0].val-24)<0.0001 ? arr[0].expr : null;
+    for (let i=0;i<arr.length;i++) for (let j=i+1;j<arr.length;j++) {
+      let rest=arr.filter((_,k)=>k!==i&&k!==j);
+      let a=arr[i], b=arr[j];
+      let ops=[
+        {v:a.val+b.val,e:`(${a.expr}+${b.expr})`},
+        {v:a.val-b.val,e:`(${a.expr}-${b.expr})`},
+        {v:b.val-a.val,e:`(${b.expr}-${a.expr})`},
+        {v:a.val*b.val,e:`(${a.expr}*${b.expr})`}
+      ];
+      if(b.val!==0) ops.push({v:a.val/b.val,e:`(${a.expr}/${b.expr})`});
+      if(a.val!==0) ops.push({v:b.val/a.val,e:`(${b.expr}/${a.expr})`});
+      for (let op of ops) { let r=helper([...rest,{val:op.v,expr:op.e}]); if(r) return r; }
+    }
+    return null;
+  }
+  return helper(nums.map(n=>({val:n,expr:n.toString()})));
+}
+
+function difficultyScore(nums,sol) {
+  let maxNum=Math.max(...nums);
+  let divCount=(sol.match(/\//g)||[]).length;
+  let needFrac=sol.includes('/')&&nums.some(n=>24%n!==0);
+  if(maxNum<=4&&divCount===0) return 'easy';
+  if(needFrac||divCount>=2||maxNum>=8) return 'hard';
+  return 'medium';
+}
+
+function generatePool() {
+  let target={easy:220,medium:300,hard:200}, counts={easy:0,medium:0,hard:0};
+  let tries=0;
+  while(Object.keys(target).some(k=>counts[k]<target[k])&&tries<60000) {
+    tries++;
+    let nums=Array.from({length:4},()=>Math.floor(Math.random()*9)+1);
+    let sol=solve(nums); if(!sol) continue;
+    let d=difficultyScore(nums,sol);
+    if(counts[d]<target[d]){ pools[d].push({nums,sol}); counts[d]++; }
+  }
+  poolReady=true;
+}
+
+// ── Game logic ─────────────────────────────────────────
+function render() {
+  if(!current) return;
+  let div=document.getElementById('numbers');
+  div.innerHTML='';
+  current.nums.forEach(n=>{
+    let d=document.createElement('div');
+    d.className='card'; d.textContent=n;
+    div.appendChild(d);
+  });
+  document.getElementById('answer').value='';
+  document.getElementById('result').textContent='';
+}
+
+function next() {
+  let arr=pools[currentDiff];
+  if(!poolReady||arr.length===0){
+    document.getElementById('result').textContent='⏳ Preparing puzzles...';
+    setTimeout(next,300); return;
+  }
+  let idx=Math.floor(Math.random()*arr.length);
+  current=arr.splice(idx,1)[0];
+  render(); startTimer();
+}
+
+function check() {
+  if(!current) return;
+  let input=document.getElementById('answer').value.trim();
+  let resultEl=document.getElementById('result');
+  let cards=document.querySelectorAll('.card');
+  cards.forEach(c=>c.classList.remove('win','shake','timeout','urgent'));
+
+  if(!/^[\d+\-*/() .]+$/.test(input)){ resultEl.textContent='⚠️ Use digits and + - * / ( ) only'; return; }
+  let used=input.match(/\d+/g)||[];
+  if(used.some(n=>n.length>1)){ resultEl.textContent='⚠️ No two-digit numbers'; return; }
+  if(used.length!==4){ resultEl.textContent='⚠️ Use exactly 4 numbers'; return; }
+  let pc=[...current.nums];
+  for(let d of used){ let i=pc.indexOf(Number(d)); if(i===-1){resultEl.textContent='🚫 Wrong numbers — use the ones shown';return;} pc.splice(i,1); }
+
+  try {
+    let val=Function('"use strict";return('+input+')')();
+    if(Math.abs(val-24)<0.0001){
+      clearInterval(timerInterval); stopUrgent();
+      streak++;
+      let bonus=streak>=3?Math.ceil(timeLeft*2):timeLeft;
+      score+=bonus;
+      document.getElementById('scoreNum').textContent=score;
+      document.getElementById('streakNum').textContent=streak;
+      let prevBest=getPersonalBest(playerName,currentDiff);
+      let isNew=submitScore(playerName,currentDiff,score);
+      if(isNew&&score>prevBest&&prevBest>0) showNewBest();
+      updateBestDisplay();
+      let msg=streak>=5?'🔥 ON FIRE!  +'+bonus+' pts'
+             :streak>=3?'⚡ Streak ×'+streak+'!  +'+bonus+' pts'
+             :'🎉 Correct!  +'+bonus+' pts';
+      resultEl.textContent=msg;
+      playWin(streak);
+      cards.forEach(c=>c.classList.add('win'));
+    } else {
+      resultEl.textContent='❌ Got '+(+val.toFixed(4))+' — not 24';
+      playSad();
+      cards.forEach(c=>{ void c.offsetWidth; c.classList.add('shake'); });
+      setTimeout(()=>cards.forEach(c=>c.classList.remove('shake')),400);
+    }
+  } catch { resultEl.textContent='⚠️ Invalid expression'; }
+}
+
+function showSolution() {
+  if(!current){ alert('No puzzle loaded'); return; }
+  clearInterval(timerInterval); stopUrgent();
+  streak=0; document.getElementById('streakNum').textContent=0;
+  alert('Solution: '+current.sol);
+}
+
+function showNewBest() {
+  let b=document.getElementById('newBestBanner');
+  b.classList.add('show');
+  setTimeout(()=>b.classList.remove('show'),2800);
+}
+
+// ── Leaderboard ────────────────────────────────────────
+function openLeaderboard() {
+  saveCurrentScore(); updateBestDisplay();
+  document.getElementById('lbModal').classList.add('open');
+  setLbDiff(currentDiff);
+}
+function closeLeaderboard() { document.getElementById('lbModal').classList.remove('open'); }
+function setLbDiff(d) {
+  lbDiff=d;
+  ['easy','medium','hard'].forEach(k=>{
+    document.getElementById('lbt-'+k).className='lb-tab'+(k===d?' sel-'+k:'');
+  });
+  renderLB();
+}
+function renderLB() {
+  let scores=getTopScores(lbDiff);
+  let list=document.getElementById('lbList');
+  let medals=['🥇','🥈','🥉'];
+  if(!scores.length){ list.innerHTML='<div class="lb-empty">No scores yet — be the first! 🎯</div>'; return; }
+  list.innerHTML=scores.map((e,i)=>{
+    let you=e.name===playerName;
+    return `<div class="lb-row${you?' lb-you':''}">
+      <span class="lb-rank">${medals[i]||i+1}</span>
+      <span class="lb-name">${e.name}${you?' <span style="font-size:11px;color:#2196F3">(you)</span>':''}</span>
+      <span class="lb-score">${e.score}</span>
+    </div>`;
+  }).join('');
+}
+document.getElementById('lbModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('lbModal')) closeLeaderboard();
+});
+
+// ── Init ───────────────────────────────────────────────
+generatePool();
+document.getElementById('nameInput').focus();
+</script>
+</body>
+</html>
