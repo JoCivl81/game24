@@ -9,13 +9,11 @@
 body {
   font-family: -apple-system, sans-serif;
   background: #eef2f7;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 16px;
+  display: flex; justify-content: center;
+  min-height: 100vh; padding: 16px;
+  -webkit-tap-highlight-color: transparent;
 }
 .container { width: 100%; max-width: 480px; text-align: center; }
-h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
 
 /* ── Name Screen ── */
 #nameScreen {
@@ -23,22 +21,22 @@ h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
   align-items: center; justify-content: center;
   min-height: 85vh; gap: 16px;
 }
-#nameScreen h2 { font-size: 28px; }
+#nameScreen h2 { font-size: 28px; font-weight: 700; }
 .name-sub { color: #888; font-size: 14px; margin-top: -8px; }
 #nameInput {
-  width: 100%; padding: 14px 16px; font-size: 17px;
+  width: 100%; max-width: 360px;
+  padding: 14px 16px; font-size: 17px;
   border-radius: 12px; border: 1px solid #ccc;
-  background: white; outline: none;
-  transition: border-color 0.2s;
+  background: white; outline: none; transition: border-color 0.2s;
 }
 #nameInput:focus { border-color: #2196F3; }
 .btn-start {
-  width: 100%; padding: 14px; font-size: 17px; font-weight: 700;
+  width: 100%; max-width: 360px;
+  padding: 14px; font-size: 17px; font-weight: 700;
   background: #2196F3; color: white; border: none;
-  border-radius: 12px; cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
+  border-radius: 12px; cursor: pointer; transition: opacity 0.15s, transform 0.1s;
 }
-.btn-start:hover  { opacity: 0.9; }
+.btn-start:hover { opacity: 0.9; }
 .btn-start:active { transform: scale(0.98); }
 
 /* ── Game Screen ── */
@@ -53,8 +51,7 @@ h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
   background: white; border: 1px solid #ddd;
   border-radius: 99px; padding: 5px 12px 5px 6px;
   font-size: 13px; cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-  transition: border-color 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07); transition: border-color 0.2s;
 }
 .player-pill:hover { border-color: #2196F3; }
 .avatar {
@@ -67,21 +64,16 @@ h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
   background: white; border: 1px solid #ddd;
   border-radius: 10px; padding: 7px 14px;
   font-size: 13px; color: #555; cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-  transition: border-color 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07); transition: border-color 0.2s;
 }
 .lb-btn:hover { border-color: #2196F3; color: #2196F3; }
 
 /* diff tabs */
-.diff-tabs {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 6px; margin-bottom: 12px;
-}
+.diff-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 12px; }
 .tab {
   padding: 9px 6px; border-radius: 10px; font-size: 13px;
   font-weight: 600; text-align: center; cursor: pointer;
-  border: 1px solid #ddd; background: white; color: #999;
-  transition: all 0.2s;
+  border: 1px solid #ddd; background: white; color: #999; transition: all 0.2s;
 }
 .tab.active-easy   { background: #e8f9ef; border-color: #4CAF50; color: #2e7d32; }
 .tab.active-medium { background: #fff8e1; border-color: #FF9800; color: #e65100; }
@@ -110,20 +102,20 @@ h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
 .stat-card .val { font-size: 22px; font-weight: 700; color: #2196F3; line-height: 1.15; }
 
 /* number cards */
-.numbers {
-  display: grid; grid-template-columns: repeat(4,1fr);
-  gap: 10px; margin-bottom: 14px;
-}
+.numbers { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 12px; }
 .card {
   aspect-ratio: 3/4; background: white; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
-  font-size: clamp(32px, 9vw, 48px); font-weight: bold;
+  font-size: clamp(30px, 9vw, 46px); font-weight: bold;
   box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+  cursor: pointer; user-select: none;
+  transition: transform 0.15s, background 0.25s, box-shadow 0.25s, opacity 0.2s;
 }
-.card.win     { background: #c8f7c5; transform: scale(1.07); }
+.card:active { transform: scale(0.91); }
+.card.used    { opacity: 0.28; cursor: default; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+.card.win     { background: #c8f7c5; cursor: default; transform: scale(1.07); }
 .card.shake   { animation: shake 0.35s; }
-.card.timeout { background: #ffe5e5; }
+.card.timeout { background: #ffe5e5; cursor: default; }
 .card.urgent  { animation: pulse-card 0.5s infinite alternate; }
 @keyframes shake {
   0%{transform:translateX(0)} 25%{transform:translateX(-7px)}
@@ -131,44 +123,117 @@ h2 { font-size: 24px; font-weight: 700; margin: 12px 0 4px; }
 }
 @keyframes pulse-card {
   from { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-  to   { box-shadow: 0 4px 20px rgba(244,67,54,0.45); }
+  to   { box-shadow: 0 4px 20px rgba(244,67,54,0.4); }
 }
 
-/* input */
-input.answer {
-  width: 100%; padding: 13px 16px; font-size: 16px;
-  border-radius: 10px; border: 1px solid #ccc; background: white;
-  margin: 4px 0 10px; outline: none; transition: border-color 0.2s;
+/* ── Token expression display ── */
+.expr-display {
+  background: white; border-radius: 12px;
+  border: 1.5px solid #ddd;
+  padding: 10px 12px; margin-bottom: 10px;
+  min-height: 56px;
+  display: flex; align-items: center;
+  flex-wrap: wrap; gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: border-color 0.2s;
+  cursor: default;
+  position: relative;
 }
-input.answer:focus { border-color: #2196F3; }
+.expr-display.active { border-color: #2196F3; }
 
-/* buttons */
-.btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-button.action {
-  padding: 13px 8px; font-size: 15px; font-weight: 600;
+.expr-placeholder {
+  color: #bbb; font-size: 14px; font-weight: 400;
+  pointer-events: none; padding: 4px 2px;
+}
+
+/* individual token chips */
+.token {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 9px; border-radius: 8px;
+  font-size: 20px; font-weight: 700; cursor: pointer;
+  user-select: none; transition: transform 0.1s, box-shadow 0.15s;
+  position: relative;
+}
+.token:active { transform: scale(0.9); }
+.token.selected {
+  outline: 2.5px solid #2196F3;
+  box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+}
+.token.tok-num  { background: #e3f2fd; color: #0d47a1; }
+.token.tok-op   { background: #f5f5f5; color: #333; }
+.token.tok-open,
+.token.tok-close { background: #f3e5f5; color: #6a1b9a; }
+
+/* cursor indicator */
+.cursor-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 3px; height: 28px; background: #2196F3;
+  border-radius: 2px; animation: blink 1s infinite;
+  flex-shrink: 0;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* del button inside display */
+.del-btn {
+  margin-left: auto; flex-shrink: 0;
+  width: 38px; height: 38px;
+  background: #f5f5f5; border: none; border-radius: 9px;
+  font-size: 17px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.15s; color: #555;
+  align-self: center;
+}
+.del-btn:hover { background: #ffe0e0; color: #c62828; }
+.del-btn:active { transform: scale(0.91); }
+
+/* operator buttons */
+.ops-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 7px; margin-bottom: 12px; }
+.op-btn {
+  padding: 14px 4px; font-size: 20px; font-weight: 700;
+  border: none; border-radius: 12px; cursor: pointer; user-select: none;
+  transition: transform 0.12s, box-shadow 0.1s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+.op-btn:active { transform: scale(0.88); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.op-plus  { background: #e3f2fd; color: #1565c0; }
+.op-minus { background: #fce4ec; color: #880e4f; }
+.op-mul   { background: #e8f5e9; color: #1b5e20; }
+.op-div   { background: #fff8e1; color: #e65100; }
+.op-open  { background: #f3e5f5; color: #4a148c; }
+.op-close { background: #f3e5f5; color: #4a148c; }
+
+/* submit */
+.submit-row { margin-bottom: 8px; }
+.btn-submit {
+  width: 100%; padding: 15px; font-size: 18px; font-weight: 700;
+  background: #4CAF50; color: white; border: none;
+  border-radius: 12px; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(76,175,80,0.35);
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-submit:hover  { opacity: 0.9; }
+.btn-submit:active { transform: scale(0.97); }
+
+.ctrl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ctrl-btn {
+  padding: 12px 8px; font-size: 15px; font-weight: 600;
   border: none; border-radius: 10px; color: white;
   cursor: pointer; transition: opacity 0.15s, transform 0.1s;
 }
-button.action:hover  { opacity: 0.88; }
-button.action:active { transform: scale(0.97); }
-.btn-check    { background: #4CAF50; }
+.ctrl-btn:hover  { opacity: 0.88; }
+.ctrl-btn:active { transform: scale(0.97); }
 .btn-next     { background: #2196F3; }
 .btn-solution { background: #FF9800; }
 
 #result { margin-top: 11px; font-size: 19px; font-weight: 600; min-height: 27px; }
 
-/* howto */
 .howto {
   background: white; border-radius: 12px;
-  padding: 12px 16px; margin-top: 16px;
+  padding: 12px 16px; margin-top: 14px;
   text-align: left; font-size: 12.5px; color: #666;
   line-height: 1.7; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 .howto strong { color: #333; }
-.howto .ex {
-  font-family: monospace; background: #f4f4f4;
-  padding: 1px 6px; border-radius: 4px; font-size: 12px; color: #1565c0;
-}
 
 /* ── Leaderboard Modal ── */
 #lbModal {
@@ -183,21 +248,16 @@ button.action:active { transform: scale(0.97); }
   max-height: 80vh; overflow-y: auto;
   box-shadow: 0 12px 40px rgba(0,0,0,0.2);
 }
-.lb-header {
-  display: flex; align-items: center;
-  justify-content: space-between; margin-bottom: 14px;
-}
+.lb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .lb-title { font-size: 19px; font-weight: 700; }
 .close-btn {
   background: #e8e8e8; border: none; color: #666;
   width: 32px; height: 32px; border-radius: 8px;
-  font-size: 18px; cursor: pointer; display: flex;
-  align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
 .close-btn:hover { background: #ddd; }
-.lb-tabs {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 14px;
-}
+.lb-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 14px; }
 .lb-tab {
   padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600;
   text-align: center; cursor: pointer; border: 1px solid #ddd;
@@ -206,7 +266,6 @@ button.action:active { transform: scale(0.97); }
 .lb-tab.sel-easy   { background: #e8f9ef; border-color: #4CAF50; color: #2e7d32; }
 .lb-tab.sel-medium { background: #fff8e1; border-color: #FF9800; color: #e65100; }
 .lb-tab.sel-hard   { background: #fdecea; border-color: #f44336; color: #c62828; }
-
 .lb-list { display: flex; flex-direction: column; gap: 6px; }
 .lb-row {
   display: flex; align-items: center; gap: 12px;
@@ -219,14 +278,12 @@ button.action:active { transform: scale(0.97); }
 .lb-score { font-size: 17px; font-weight: 700; color: #2196F3; }
 .lb-empty { color: #aaa; text-align: center; padding: 28px 0; font-size: 14px; }
 
-/* new best banner */
 #newBestBanner {
   position: fixed; top: 20px; left: 50%;
   transform: translateX(-50%) translateY(-80px);
   background: #2196F3; color: white;
   font-size: 14px; font-weight: 700;
-  padding: 10px 24px; border-radius: 99px;
-  z-index: 200;
+  padding: 10px 24px; border-radius: 99px; z-index: 200;
   box-shadow: 0 4px 16px rgba(33,150,243,0.4);
   transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
   white-space: nowrap;
@@ -243,8 +300,8 @@ button.action:active { transform: scale(0.97); }
     <h2>Game 24 Pro</h2>
     <p class="name-sub">Use 4 numbers to make 24</p>
     <input id="nameInput" placeholder="Enter your name to start" maxlength="20"
-           onkeydown="if(event.key==='Enter') startGame()" style="max-width:360px">
-    <button class="btn-start" style="max-width:360px" onclick="startGame()">Let's Play →</button>
+           onkeydown="if(event.key==='Enter') startGame()">
+    <button class="btn-start" onclick="startGame()">Let's Play →</button>
   </div>
 
   <!-- Game Screen -->
@@ -279,21 +336,37 @@ button.action:active { transform: scale(0.97); }
 
     <div class="numbers" id="numbers"></div>
 
-    <input class="answer" id="answer" placeholder="e.g. (3+5)*(6-2)"
-           onkeydown="if(event.key==='Enter') check()">
+    <!-- Token display -->
+    <div class="expr-display" id="exprDisplay">
+      <span class="expr-placeholder" id="exprPlaceholder">Tap numbers and operators…</span>
+      <button class="del-btn" id="delBtn" onclick="deleteAtCursor()" style="display:none">⌫</button>
+    </div>
 
-    <div class="btn-row">
-      <button class="action btn-check"    onclick="check()">Check ✓</button>
-      <button class="action btn-next"     onclick="next()">Next →</button>
-      <button class="action btn-solution" onclick="showSolution()">Solve</button>
+    <!-- Operators -->
+    <div class="ops-grid">
+      <button class="op-btn op-plus"  onclick="insertAtCursor('+','+')" >+</button>
+      <button class="op-btn op-minus" onclick="insertAtCursor('−','-')" >−</button>
+      <button class="op-btn op-mul"   onclick="insertAtCursor('×','*')" >×</button>
+      <button class="op-btn op-div"   onclick="insertAtCursor('÷','/')" >÷</button>
+      <button class="op-btn op-open"  onclick="insertAtCursor('(','(')" >(</button>
+      <button class="op-btn op-close" onclick="insertAtCursor(')',')')" >)</button>
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-submit" onclick="check()">Submit ✓</button>
+    </div>
+
+    <div class="ctrl-row">
+      <button class="ctrl-btn btn-next"     onclick="next()">Next Question →</button>
+      <button class="ctrl-btn btn-solution" onclick="showSolution()">Show Solution</button>
     </div>
 
     <p id="result"></p>
 
     <div class="howto">
-      <strong>How to play</strong> — Use all <strong>4 numbers</strong> with <strong>+ − × ÷</strong> to make <strong>24</strong>.
-      Each number exactly once. E.g. <span class="ex">(3+5)*(6-2)</span>
-      &nbsp;·&nbsp; ⚡ Faster = more pts &nbsp;·&nbsp; 🔥 Streak ×3 doubles points
+      <strong>How to play</strong> — Tap a number card to insert it (each once). Tap <strong>+ − × ÷ ( )</strong> to build your expression.
+      Tap any token to move the cursor there and edit. Press <strong>Submit</strong> when done.<br>
+      ⚡ Faster = more pts &nbsp;·&nbsp; 🔥 Streak ×3 doubles points
     </div>
 
   </div>
@@ -318,6 +391,7 @@ button.action:active { transform: scale(0.97); }
 <div id="newBestBanner">🎊 New Personal Best!</div>
 
 <script>
+// ── State ──────────────────────────────────────────────
 let playerName = '';
 let currentDiff = 'easy';
 let pools = { easy:[], medium:[], hard:[] };
@@ -326,107 +400,20 @@ let poolReady = false;
 let score = 0, streak = 0;
 let timeLeft = 150, timerMax = 150;
 let timerInterval = null;
-let urgentPlaying = false;
-let urgentInterval = null;
-let urgentBeat = 0;
+let urgentPlaying = false, urgentInterval = null, urgentBeat = 0;
 let lbDiff = 'easy';
+let inputLocked = false;
+
+// Token list & cursor
+// token: { display, eval, type:'num'|'op'|'paren', numIdx? }
+let tokens = [];
+let cursorPos = 0;     // 0..tokens.length  (insert position)
+let selectedTok = -1;  // index of selected token (-1 = none, cursor mode)
 
 const CIRC = 2 * Math.PI * 25;
 const arcEl = document.getElementById('timerArc');
 const timerNumEl = document.getElementById('timerNum');
 arcEl.style.strokeDasharray = CIRC;
-
-// ── Storage ────────────────────────────────────────────
-function loadLB() { try { return JSON.parse(localStorage.getItem('lb24pro')||'{}'); } catch { return {}; } }
-function saveLB(lb) { localStorage.setItem('lb24pro', JSON.stringify(lb)); }
-function getTopScores(d) { return (loadLB()[d]||[]).sort((a,b)=>b.score-a.score).slice(0,10); }
-function getPersonalBest(name,d) { return (loadLB()[d]||[]).find(e=>e.name===name)?.score||0; }
-function submitScore(name,d,s) {
-  let lb=loadLB(); if(!lb[d]) lb[d]=[];
-  let ex=lb[d].find(e=>e.name===name);
-  let isNew=false;
-  if(!ex){ lb[d].push({name,score:s}); isNew=true; }
-  else if(s>ex.score){ ex.score=s; isNew=true; }
-  saveLB(lb); return isNew;
-}
-
-// ── Name / Player ──────────────────────────────────────
-function startGame() {
-  let n = document.getElementById('nameInput').value.trim();
-  if (!n) { document.getElementById('nameInput').focus(); return; }
-  playerName = n;
-  document.getElementById('nameScreen').style.display = 'none';
-  document.getElementById('gameScreen').style.display = 'block';
-  document.getElementById('playerNameEl').textContent = n;
-  document.getElementById('avatarEl').textContent = n[0].toUpperCase();
-  setDiff('easy');
-}
-
-function changePlayer() {
-  if (!confirm('Change player? Score will be saved.')) return;
-  saveCurrentScore();
-  score=0; streak=0;
-  document.getElementById('scoreNum').textContent=0;
-  document.getElementById('streakNum').textContent=0;
-  document.getElementById('gameScreen').style.display='none';
-  document.getElementById('nameScreen').style.display='flex';
-  document.getElementById('nameInput').value='';
-}
-
-function saveCurrentScore() { if(playerName && score>0) submitScore(playerName,currentDiff,score); }
-
-// ── Difficulty ─────────────────────────────────────────
-function setDiff(d) {
-  currentDiff = d;
-  ['easy','medium','hard'].forEach(k => {
-    let t = document.getElementById('tab-'+k);
-    t.className = 'tab' + (k===d ? ' active-'+k : '');
-  });
-  timerMax = d==='easy' ? 150 : d==='medium' ? 120 : 90;
-  score=0; streak=0;
-  document.getElementById('scoreNum').textContent=0;
-  document.getElementById('streakNum').textContent=0;
-  updateBestDisplay();
-  next();
-}
-
-function updateBestDisplay() {
-  document.getElementById('bestNum').textContent = getPersonalBest(playerName, currentDiff);
-}
-
-// ── Timer ──────────────────────────────────────────────
-function timerColor(t, max) {
-  if (t/max > 0.4) return '#4CAF50';
-  if (t/max > 0.2) return '#FF9800';
-  return '#f44336';
-}
-function setTimerDisplay(t) {
-  arcEl.style.strokeDashoffset = CIRC*(1-t/timerMax);
-  let c = timerColor(t,timerMax);
-  arcEl.style.stroke = c;
-  timerNumEl.textContent = t;
-  timerNumEl.style.color = c;
-}
-function startTimer() {
-  clearInterval(timerInterval);
-  stopUrgent();
-  timeLeft = timerMax;
-  setTimerDisplay(timeLeft);
-  timerInterval = setInterval(()=>{
-    timeLeft--;
-    setTimerDisplay(timeLeft);
-    if (timeLeft === Math.floor(timerMax*0.2)) startUrgent();
-    if (timeLeft <= 0) { clearInterval(timerInterval); onTimeout(); }
-  }, 1000);
-}
-function onTimeout() {
-  stopUrgent();
-  streak=0;
-  document.getElementById('streakNum').textContent=0;
-  document.getElementById('result').textContent = '⏰ Time\'s up!';
-  document.querySelectorAll('.card').forEach(c=>{ c.classList.remove('win','urgent'); c.classList.add('timeout'); });
-  playSad();
-}
 
 // ── Audio ──────────────────────────────────────────────
 const actx = new (window.AudioContext||window.webkitAudioContext)();
@@ -442,54 +429,147 @@ function tone(freq, type, t0, dur, vol, freqEnd) {
   o.start(t0); o.stop(t0+dur+0.02);
 }
 
-function playSad() {
-  tone(280,'sawtooth', actx.currentTime, 0.45, 0.25, 90);
-}
-
-function playWin(s) {
+function playClick() {
+  // Soft tick: very short sine pop
   let t = actx.currentTime;
-  [523,659,784,1047].forEach((f,i) => tone(f,'triangle', t+i*0.09, 0.45, 0.28));
-  [261,329,392].forEach(f => tone(f,'sine', t, 0.6, 0.1));
-  if (s>=3) tone(1600,'sine', t+0.45, 0.4, 0.32, 2800);
-  if (s>=5) {
-    tone(80,'sine', t, 0.2, 0.45, 40);
-    [1047,1319,1568].forEach((f,i) => tone(f,'triangle', t+0.5+i*0.1, 0.1, 0.32));
+  tone(900, 'sine', t, 0.04, 0.15);
+}
+function playClickOp() {
+  let t = actx.currentTime;
+  tone(600, 'sine', t, 0.05, 0.12);
+}
+function playClickDel() {
+  let t = actx.currentTime;
+  tone(350, 'sine', t, 0.06, 0.13, 200);
+}
+function playSad() { tone(280,'sawtooth',actx.currentTime,0.45,0.25,90); }
+function playWin(s) {
+  let t=actx.currentTime;
+  [523,659,784,1047].forEach((f,i)=>tone(f,'triangle',t+i*0.09,0.45,0.28));
+  [261,329,392].forEach(f=>tone(f,'sine',t,0.6,0.1));
+  if(s>=3) tone(1600,'sine',t+0.45,0.4,0.32,2800);
+  if(s>=5) {
+    tone(80,'sine',t,0.2,0.45,40);
+    [1047,1319,1568].forEach((f,i)=>tone(f,'triangle',t+0.5+i*0.1,0.1,0.32));
   }
 }
-
 function startUrgent() {
-  if (urgentPlaying) return;
-  urgentPlaying = true; urgentBeat = 0;
-  document.querySelectorAll('.card').forEach(c=>c.classList.add('urgent'));
-  urgentInterval = setInterval(()=>{
-    if (!urgentPlaying) return;
-    let t = actx.currentTime;
-    urgentBeat++;
-    // heartbeat thud
-    tone(58,'sine', t,      0.13, 0.5, 44);
-    tone(52,'sine', t+0.16, 0.1,  0.35, 38);
-    // rising tick
-    let pitch = Math.min(300 + urgentBeat*20, 950);
-    tone(pitch,'square', t+0.06, 0.06, 0.07);
-    // accent every 4 beats
-    if (urgentBeat%4===0) tone(pitch*2,'sawtooth', t, 0.07, 0.11);
-  }, 500);
+  if(urgentPlaying) return;
+  urgentPlaying=true; urgentBeat=0;
+  document.querySelectorAll('.card:not(.used)').forEach(c=>c.classList.add('urgent'));
+  urgentInterval=setInterval(()=>{
+    if(!urgentPlaying) return;
+    let t=actx.currentTime; urgentBeat++;
+    tone(58,'sine',t,0.13,0.5,44);
+    tone(52,'sine',t+0.16,0.1,0.35,38);
+    let pitch=Math.min(300+urgentBeat*20,950);
+    tone(pitch,'square',t+0.06,0.06,0.07);
+    if(urgentBeat%4===0) tone(pitch*2,'sawtooth',t,0.07,0.11);
+  },500);
+}
+function stopUrgent() {
+  urgentPlaying=false; clearInterval(urgentInterval); urgentBeat=0;
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('urgent'));
 }
 
-function stopUrgent() {
-  urgentPlaying=false;
-  clearInterval(urgentInterval);
-  urgentBeat=0;
-  document.querySelectorAll('.card').forEach(c=>c.classList.remove('urgent'));
+// ── Storage (case-insensitive name key) ───────────────
+function normName(n) { return n.trim().toLowerCase(); }
+function loadLB() { try { return JSON.parse(localStorage.getItem('lb24pro')||'{}'); } catch { return {}; } }
+function saveLB(lb) { localStorage.setItem('lb24pro', JSON.stringify(lb)); }
+
+function getTopScores(d) {
+  return (loadLB()[d]||[]).sort((a,b)=>b.score-a.score).slice(0,10);
+}
+function getPersonalBest(name,d) {
+  let key=normName(name);
+  return (loadLB()[d]||[]).find(e=>normName(e.name)===key)?.score||0;
+}
+function submitScore(name,d,s) {
+  let lb=loadLB(); if(!lb[d]) lb[d]=[];
+  let key=normName(name);
+  let ex=lb[d].find(e=>normName(e.name)===key);
+  let isNew=false;
+  if(!ex){ lb[d].push({name:name.trim(),score:s}); isNew=true; }
+  else if(s>ex.score){ ex.score=s; isNew=true; }
+  saveLB(lb); return isNew;
+}
+
+// ── Name / Player ──────────────────────────────────────
+function startGame() {
+  let n=document.getElementById('nameInput').value.trim();
+  if(!n){ document.getElementById('nameInput').focus(); return; }
+  playerName=n;
+  document.getElementById('nameScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('playerNameEl').textContent=n;
+  document.getElementById('avatarEl').textContent=n[0].toUpperCase();
+  setDiff('easy');
+}
+function changePlayer() {
+  if(!confirm('Change player? Score will be saved.')) return;
+  saveCurrentScore();
+  score=0; streak=0;
+  document.getElementById('scoreNum').textContent=0;
+  document.getElementById('streakNum').textContent=0;
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('nameScreen').style.display='flex';
+  document.getElementById('nameInput').value='';
+}
+function saveCurrentScore() { if(playerName&&score>0) submitScore(playerName,currentDiff,score); }
+
+// ── Difficulty ─────────────────────────────────────────
+function setDiff(d) {
+  currentDiff=d;
+  ['easy','medium','hard'].forEach(k=>{
+    document.getElementById('tab-'+k).className='tab'+(k===d?' active-'+k:'');
+  });
+  timerMax=d==='easy'?150:d==='medium'?120:90;
+  score=0; streak=0;
+  document.getElementById('scoreNum').textContent=0;
+  document.getElementById('streakNum').textContent=0;
+  updateBestDisplay(); next();
+}
+function updateBestDisplay() {
+  document.getElementById('bestNum').textContent=getPersonalBest(playerName,currentDiff);
+}
+
+// ── Timer ──────────────────────────────────────────────
+function timerColor(t,max) {
+  if(t/max>0.4) return '#4CAF50';
+  if(t/max>0.2) return '#FF9800';
+  return '#f44336';
+}
+function setTimerDisplay(t) {
+  arcEl.style.strokeDashoffset=CIRC*(1-t/timerMax);
+  let c=timerColor(t,timerMax);
+  arcEl.style.stroke=c; timerNumEl.textContent=t; timerNumEl.style.color=c;
+}
+function startTimer() {
+  clearInterval(timerInterval); stopUrgent();
+  timeLeft=timerMax; setTimerDisplay(timeLeft);
+  timerInterval=setInterval(()=>{
+    timeLeft--; setTimerDisplay(timeLeft);
+    if(timeLeft===Math.floor(timerMax*0.2)) startUrgent();
+    if(timeLeft<=0){ clearInterval(timerInterval); onTimeout(); }
+  },1000);
+}
+function onTimeout() {
+  stopUrgent(); streak=0;
+  document.getElementById('streakNum').textContent=0;
+  document.getElementById('result').textContent='⏰ Time\'s up!';
+  document.querySelectorAll('.card').forEach(c=>{
+    c.classList.remove('win','urgent','used'); c.classList.add('timeout');
+  });
+  playSad(); inputLocked=true; renderTokens();
 }
 
 // ── Solver ─────────────────────────────────────────────
 function solve(nums) {
   function helper(arr) {
-    if (arr.length===1) return Math.abs(arr[0].val-24)<0.0001 ? arr[0].expr : null;
-    for (let i=0;i<arr.length;i++) for (let j=i+1;j<arr.length;j++) {
+    if(arr.length===1) return Math.abs(arr[0].val-24)<0.0001?arr[0].expr:null;
+    for(let i=0;i<arr.length;i++) for(let j=i+1;j<arr.length;j++){
       let rest=arr.filter((_,k)=>k!==i&&k!==j);
-      let a=arr[i], b=arr[j];
+      let a=arr[i],b=arr[j];
       let ops=[
         {v:a.val+b.val,e:`(${a.expr}+${b.expr})`},
         {v:a.val-b.val,e:`(${a.expr}-${b.expr})`},
@@ -498,13 +578,12 @@ function solve(nums) {
       ];
       if(b.val!==0) ops.push({v:a.val/b.val,e:`(${a.expr}/${b.expr})`});
       if(a.val!==0) ops.push({v:b.val/a.val,e:`(${b.expr}/${a.expr})`});
-      for (let op of ops) { let r=helper([...rest,{val:op.v,expr:op.e}]); if(r) return r; }
+      for(let op of ops){let r=helper([...rest,{val:op.v,expr:op.e}]);if(r) return r;}
     }
     return null;
   }
   return helper(nums.map(n=>({val:n,expr:n.toString()})));
 }
-
 function difficultyScore(nums,sol) {
   let maxNum=Math.max(...nums);
   let divCount=(sol.match(/\//g)||[]).length;
@@ -513,31 +592,144 @@ function difficultyScore(nums,sol) {
   if(needFrac||divCount>=2||maxNum>=8) return 'hard';
   return 'medium';
 }
-
 function generatePool() {
-  let target={easy:220,medium:300,hard:200}, counts={easy:0,medium:0,hard:0};
+  let target={easy:220,medium:300,hard:200},counts={easy:0,medium:0,hard:0};
   let tries=0;
-  while(Object.keys(target).some(k=>counts[k]<target[k])&&tries<60000) {
+  while(Object.keys(target).some(k=>counts[k]<target[k])&&tries<60000){
     tries++;
     let nums=Array.from({length:4},()=>Math.floor(Math.random()*9)+1);
     let sol=solve(nums); if(!sol) continue;
     let d=difficultyScore(nums,sol);
-    if(counts[d]<target[d]){ pools[d].push({nums,sol}); counts[d]++; }
+    if(counts[d]<target[d]){pools[d].push({nums,sol});counts[d]++;}
   }
   poolReady=true;
 }
 
-// ── Game logic ─────────────────────────────────────────
+// ── Token / Cursor logic ───────────────────────────────
+function usedNumIndices() {
+  return new Set(tokens.filter(t=>t.type==='num').map(t=>t.numIdx));
+}
+
+// Render token chips + blinking cursor into #exprDisplay
+function renderTokens() {
+  let display = document.getElementById('exprDisplay');
+  let ph = document.getElementById('exprPlaceholder');
+  let delBtn = document.getElementById('delBtn');
+
+  // Clear old chips (keep placeholder & del)
+  Array.from(display.querySelectorAll('.token,.cursor-chip')).forEach(el=>el.remove());
+
+  if(tokens.length===0) {
+    ph.style.display='';
+    delBtn.style.display='none';
+    display.classList.remove('active');
+    return;
+  }
+  ph.style.display='none';
+  delBtn.style.display='';
+  display.classList.add('active');
+
+  // Insert chips and cursor
+  // We'll build fragment then insert before delBtn
+  let frag = document.createDocumentFragment();
+
+  for(let i=0;i<=tokens.length;i++){
+    // cursor position
+    if(!inputLocked && i===cursorPos){
+      let cur=document.createElement('span');
+      cur.className='cursor-chip';
+      frag.appendChild(cur);
+    }
+    if(i<tokens.length){
+      let t=tokens[i];
+      let chip=document.createElement('span');
+      chip.className='token tok-'+(t.type==='num'?'num':t.type==='paren'?'open':'op');
+      chip.textContent=t.display;
+      chip.dataset.idx=i;
+      chip.addEventListener('click', e=>{
+        e.stopPropagation();
+        if(inputLocked) return;
+        playClick();
+        // move cursor to after this token
+        cursorPos=i+1;
+        renderTokens();
+      });
+      frag.appendChild(chip);
+    }
+  }
+
+  // insert before del button
+  display.insertBefore(frag, delBtn);
+}
+
+// Insert a token at cursorPos
+function insertAtCursor(display, evalStr, type) {
+  if(inputLocked) return;
+  let tok = { display, eval: evalStr, type: type||'op' };
+  tokens.splice(cursorPos, 0, tok);
+  cursorPos++;
+  document.getElementById('result').textContent='';
+  renderTokens();
+}
+
+// Insert a number token at cursorPos
+function insertNum(idx) {
+  if(inputLocked) return;
+  let used = usedNumIndices();
+  if(used.has(idx)) return;
+  playClick();
+  let n=current.nums[idx];
+  tokens.splice(cursorPos, 0, { display:String(n), eval:String(n), type:'num', numIdx:idx });
+  cursorPos++;
+  // mark card used
+  document.querySelectorAll('.card')[idx].classList.add('used');
+  document.getElementById('result').textContent='';
+  renderTokens();
+}
+
+// Delete token just before cursorPos
+function deleteAtCursor() {
+  if(inputLocked) return;
+  if(cursorPos===0) return;
+  playClickDel();
+  let removed = tokens.splice(cursorPos-1, 1)[0];
+  cursorPos--;
+  if(removed.type==='num') {
+    document.querySelectorAll('.card')[removed.numIdx].classList.remove('used');
+  }
+  document.getElementById('result').textContent='';
+  renderTokens();
+}
+
+// Click on display background → move cursor to end
+document.getElementById('exprDisplay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('exprDisplay') ||
+     e.target===document.getElementById('exprPlaceholder')) {
+    if(inputLocked) return;
+    cursorPos=tokens.length;
+    renderTokens();
+  }
+});
+
+function clearExpr() {
+  tokens=[]; cursorPos=0;
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('used'));
+  renderTokens();
+}
+
+// ── Render number cards ────────────────────────────────
 function render() {
   if(!current) return;
   let div=document.getElementById('numbers');
   div.innerHTML='';
-  current.nums.forEach(n=>{
+  current.nums.forEach((n,i)=>{
     let d=document.createElement('div');
     d.className='card'; d.textContent=n;
+    d.onclick=()=>insertNum(i);
     div.appendChild(d);
   });
-  document.getElementById('answer').value='';
+  clearExpr();
+  inputLocked=false;
   document.getElementById('result').textContent='';
 }
 
@@ -552,22 +744,20 @@ function next() {
   render(); startTimer();
 }
 
+// ── Check ──────────────────────────────────────────────
 function check() {
-  if(!current) return;
-  let input=document.getElementById('answer').value.trim();
+  if(!current||inputLocked) return;
   let resultEl=document.getElementById('result');
   let cards=document.querySelectorAll('.card');
-  cards.forEach(c=>c.classList.remove('win','shake','timeout','urgent'));
 
-  if(!/^[\d+\-*/() .]+$/.test(input)){ resultEl.textContent='⚠️ Use digits and + - * / ( ) only'; return; }
-  let used=input.match(/\d+/g)||[];
-  if(used.some(n=>n.length>1)){ resultEl.textContent='⚠️ No two-digit numbers'; return; }
-  if(used.length!==4){ resultEl.textContent='⚠️ Use exactly 4 numbers'; return; }
-  let pc=[...current.nums];
-  for(let d of used){ let i=pc.indexOf(Number(d)); if(i===-1){resultEl.textContent='🚫 Wrong numbers — use the ones shown';return;} pc.splice(i,1); }
+  let used=usedNumIndices();
+  if(used.size!==4){ resultEl.textContent='⚠️ Use all 4 numbers'; return; }
+  if(!tokens.some(t=>t.type==='op')){ resultEl.textContent='⚠️ Add operators'; return; }
 
+  let expr=tokens.map(t=>t.eval).join('');
   try {
-    let val=Function('"use strict";return('+input+')')();
+    let val=Function('"use strict";return('+expr+')')();
+    if(isNaN(val)||!isFinite(val)) throw 0;
     if(Math.abs(val-24)<0.0001){
       clearInterval(timerInterval); stopUrgent();
       streak++;
@@ -584,7 +774,8 @@ function check() {
              :'🎉 Correct!  +'+bonus+' pts';
       resultEl.textContent=msg;
       playWin(streak);
-      cards.forEach(c=>c.classList.add('win'));
+      cards.forEach(c=>{ c.classList.remove('urgent','used'); c.classList.add('win'); });
+      inputLocked=true; renderTokens();
     } else {
       resultEl.textContent='❌ Got '+(+val.toFixed(4))+' — not 24';
       playSad();
@@ -598,7 +789,9 @@ function showSolution() {
   if(!current){ alert('No puzzle loaded'); return; }
   clearInterval(timerInterval); stopUrgent();
   streak=0; document.getElementById('streakNum').textContent=0;
-  alert('Solution: '+current.sol);
+  let pretty=current.sol.replace(/\*/g,'×').replace(/\//g,'÷');
+  alert('Solution: '+pretty);
+  inputLocked=true; renderTokens();
 }
 
 function showNewBest() {
@@ -613,21 +806,21 @@ function openLeaderboard() {
   document.getElementById('lbModal').classList.add('open');
   setLbDiff(currentDiff);
 }
-function closeLeaderboard() { document.getElementById('lbModal').classList.remove('open'); }
-function setLbDiff(d) {
+function closeLeaderboard(){ document.getElementById('lbModal').classList.remove('open'); }
+function setLbDiff(d){
   lbDiff=d;
   ['easy','medium','hard'].forEach(k=>{
     document.getElementById('lbt-'+k).className='lb-tab'+(k===d?' sel-'+k:'');
   });
   renderLB();
 }
-function renderLB() {
+function renderLB(){
   let scores=getTopScores(lbDiff);
   let list=document.getElementById('lbList');
   let medals=['🥇','🥈','🥉'];
   if(!scores.length){ list.innerHTML='<div class="lb-empty">No scores yet — be the first! 🎯</div>'; return; }
   list.innerHTML=scores.map((e,i)=>{
-    let you=e.name===playerName;
+    let you=normName(e.name)===normName(playerName);
     return `<div class="lb-row${you?' lb-you':''}">
       <span class="lb-rank">${medals[i]||i+1}</span>
       <span class="lb-name">${e.name}${you?' <span style="font-size:11px;color:#2196F3">(you)</span>':''}</span>
@@ -637,6 +830,11 @@ function renderLB() {
 }
 document.getElementById('lbModal').addEventListener('click',e=>{
   if(e.target===document.getElementById('lbModal')) closeLeaderboard();
+});
+
+// Op buttons also play sound
+document.querySelectorAll('.op-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>playClickOp());
 });
 
 // ── Init ───────────────────────────────────────────────
