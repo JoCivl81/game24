@@ -568,18 +568,24 @@ function getPersonalBest(name,d) {
 
 function submitScore(name,d,s) {
   let prev=getPersonalBest(name,d);
-  if(s<=prev) return false;
+  console.log('[submit] name=',name,' d=',d,' s=',s,' prev=',prev,' lbRef=',typeof lbRef);
+  if(s<=prev){ console.log('[submit] skipped: not higher than prev'); return false; }
   let key=fbKey(name);
   if(typeof lbRef!=='undefined') {
     let ref=lbRef.child(d).child(key);
     ref.once('value', snap=>{
       let cur=snap.val();
+      console.log('[submit] firebase current=',cur);
       if(!cur||s>(cur.score||0)){
         ref.set({name:name.trim(),score:s})
           .then(()=>console.log('Saved to Firebase:',name,d,s))
           .catch(err=>console.error('Firebase save error:',err));
+      } else {
+        console.log('[submit] skipped: firebase has higher score',cur.score);
       }
     });
+  } else {
+    console.log('[submit] lbRef not defined');
   }
   return true;
 }
@@ -606,7 +612,11 @@ function changePlayer() {
   document.getElementById('nameScreen').style.display='flex';
   document.getElementById('nameInput').value='';
 }
-function saveCurrentScore() { if(playerName&&score>0) submitScore(playerName,currentDiff,score); }
+function saveCurrentScore() {
+  console.log('[save] playerName=',playerName,' score=',score,' diff=',currentDiff);
+  if(playerName&&score>0) submitScore(playerName,currentDiff,score);
+  else console.log('[save] skipped: name or score empty');
+}
 
 function saveAndExit() {
   saveCurrentScore();
