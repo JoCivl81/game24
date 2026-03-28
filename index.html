@@ -968,6 +968,7 @@ function openLeaderboard() {
       lbRef.child(d).orderByChild('score').limitToLast(10).once('value', snap=>{
         let rows=[];
         snap.forEach(child=>rows.push(child.val()));
+        console.log('[fetch]',d,rows);
         lbCache[d]=rows.filter(e=>e&&e.score).sort((a,b)=>b.score-a.score);
         if(lbDiff===d) renderLB();
       });
