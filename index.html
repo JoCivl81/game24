@@ -38,6 +38,21 @@ body {
 }
 .btn-start:hover { opacity: 0.9; }
 .btn-start:active { transform: scale(0.98); }
+.btn-continue {
+  width: 100%; max-width: 360px;
+  padding: 14px; font-size: 16px; font-weight: 700;
+  background: #4CAF50; color: white; border: none;
+  border-radius: 12px; cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+}
+.btn-continue:hover { opacity: 0.9; }
+.btn-continue:active { transform: scale(0.98); }
+.btn-save-exit {
+  width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+  background: #9C27B0; color: white; border: none;
+  border-radius: 12px; cursor: pointer; margin-top: 8px;
+  transition: opacity 0.15s;
+}
+.btn-save-exit:hover { opacity: 0.9; }
 
 /* ── Game Screen ── */
 #gameScreen { display: none; }
@@ -302,6 +317,10 @@ body {
     <input id="nameInput" placeholder="Enter your name to start" maxlength="20"
            onkeydown="if(event.key==='Enter') startGame()">
     <button class="btn-start" onclick="startGame()">Let's Play →</button>
+    <div id="continuePanel" style="display:none; width:100%; max-width:360px;">
+      <button class="btn-continue" id="btnContinue" onclick="continueGame()">▶ Continue</button>
+      <p style="font-size:12px;color:#aaa;margin-top:6px;">หรือพิมพ์ชื่อใหม่เพื่อเริ่มเกมใหม่</p>
+    </div>
     <p id="playerCountDisplay" style="color:#aaa;font-size:13px;margin-top:4px;">👥 ...</p>
   </div>
 
@@ -361,6 +380,7 @@ body {
       <button class="ctrl-btn btn-next"     onclick="next()">Next Question →</button>
       <button class="ctrl-btn btn-solution" onclick="showSolution()">Show Solution</button>
     </div>
+    <button class="btn-save-exit" onclick="saveAndExit()">💾 Save & Exit</button>
 
     <p id="result"></p>
 
@@ -584,6 +604,51 @@ function changePlayer() {
   document.getElementById('nameInput').value='';
 }
 function saveCurrentScore() { if(playerName&&score>0) submitScore(playerName,currentDiff,score); }
+
+function saveAndExit() {
+  saveCurrentScore();
+  localStorage.setItem('savedProgress24', JSON.stringify({
+    name: playerName, score: score, streak: streak, diff: currentDiff
+  }));
+  clearInterval(timerInterval); stopUrgent();
+  score=0; streak=0;
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('nameScreen').style.display='flex';
+  document.getElementById('nameInput').value='';
+  checkSavedProgress();
+}
+
+function checkSavedProgress() {
+  let saved=null;
+  try { saved=JSON.parse(localStorage.getItem('savedProgress24')); } catch {}
+  let panel=document.getElementById('continuePanel');
+  let btn=document.getElementById('btnContinue');
+  if(saved&&saved.name&&saved.score>0){
+    btn.textContent='▶ Continue as '+saved.name+' — Score: '+saved.score+' ('+saved.diff+')';
+    panel.style.display='block';
+  } else {
+    panel.style.display='none';
+  }
+}
+
+function continueGame() {
+  let saved=null;
+  try { saved=JSON.parse(localStorage.getItem('savedProgress24')); } catch {}
+  if(!saved) return;
+  playerName=saved.name;
+  score=saved.score||0;
+  streak=saved.streak||0;
+  localStorage.removeItem('savedProgress24');
+  document.getElementById('nameScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('playerNameEl').textContent=playerName;
+  document.getElementById('avatarEl').textContent=playerName[0].toUpperCase();
+  setDiff(saved.diff||'easy');
+  score=saved.score||0;
+  streak=saved.streak||0;
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('streakNum').textContent=streak;
+}
 
 // ── Difficulty ─────────────────────────────────────────
 function setDiff(d) {
@@ -919,6 +984,7 @@ document.querySelectorAll('.op-btn').forEach(btn=>{
 // ── Init ───────────────────────────────────────────────
 generatePool();
 document.getElementById('nameInput').focus();
+checkSavedProgress();
 </script>
 
 <!-- Firebase -->
