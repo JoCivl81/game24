@@ -965,12 +965,16 @@ function openLeaderboard() {
   // Force fresh fetch from Firebase
   if(typeof lbRef!=='undefined'){
     ['easy','medium','hard'].forEach(d=>{
-      lbRef.child(d).orderByChild('score').limitToLast(10).once('value', snap=>{
+      lbRef.child(d).once('value', snap=>{
         let rows=[];
-        snap.forEach(child=>rows.push(child.val()));
-        console.log('[fetch]',d,rows);
-        lbCache[d]=rows.filter(e=>e&&e.score).sort((a,b)=>b.score-a.score);
+        snap.forEach(child=>{
+          let v=child.val();
+          if(v&&typeof v.score==='number'&&v.score>0) rows.push(v);
+        });
+        rows.sort((a,b)=>b.score-a.score);
+        lbCache[d]=rows.slice(0,10);
         if(lbDiff===d) renderLB();
+        if(typeof currentDiff!=='undefined'&&currentDiff===d) updateBestDisplay();
       });
     });
   }
@@ -1046,11 +1050,14 @@ checkSavedProgress();
 
   // Sync leaderboard cache from Firebase (real-time)
   ['easy','medium','hard'].forEach(d => {
-    lbRef.child(d).orderByChild('score').limitToLast(10).on('value', snap => {
+    lbRef.child(d).on('value', snap => {
       let rows = [];
-      snap.forEach(child => rows.push(child.val()));
-      lbCache[d] = rows.sort((a,b) => b.score - a.score);
-      // Refresh UI if leaderboard modal is open on this tab
+      snap.forEach(child => {
+        let v = child.val();
+        if(v && typeof v.score === 'number' && v.score > 0) rows.push(v);
+      });
+      rows.sort((a,b) => b.score - a.score);
+      lbCache[d] = rows.slice(0,10);
       if(typeof lbDiff !== 'undefined' && lbDiff === d) renderLB();
       if(typeof currentDiff !== 'undefined' && currentDiff === d) updateBestDisplay();
     });
