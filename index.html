@@ -569,13 +569,16 @@ function getPersonalBest(name,d) {
 function submitScore(name,d,s) {
   let prev=getPersonalBest(name,d);
   if(s<=prev) return false;
-  // Write to Firebase — transaction ensures only higher score is kept
   let key=fbKey(name);
-  // lbRef is defined in Firebase block below
   if(typeof lbRef!=='undefined') {
-    lbRef.child(d).child(key).transaction(cur=>{
-      if(!cur||s>(cur.score||0)) return { name:name.trim(), score:s };
-      return cur; // abort if existing score is higher
+    let ref=lbRef.child(d).child(key);
+    ref.once('value', snap=>{
+      let cur=snap.val();
+      if(!cur||s>(cur.score||0)){
+        ref.set({name:name.trim(),score:s})
+          .then(()=>console.log('Saved to Firebase:',name,d,s))
+          .catch(err=>console.error('Firebase save error:',err));
+      }
     });
   }
   return true;
