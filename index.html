@@ -53,6 +53,7 @@ body {
   transition: opacity 0.15s;
 }
 .btn-save-exit:hover { opacity: 0.9; }
+.btn-save-exit:disabled { background: #bbb; cursor: not-allowed; opacity: 0.6; }
 
 /* ── Game Screen ── */
 #gameScreen { display: none; }
@@ -451,6 +452,7 @@ let timeLeft = 150, timerMax = 150;
 let timerInterval = null;
 let urgentPlaying = false, urgentInterval = null, urgentBeat = 0;
 let lbDiff = 'easy';
+let lbFull = { easy:[], medium:[], hard:[] };
 let inputLocked = false;
 
 // Token list & cursor
@@ -621,7 +623,8 @@ function saveCurrentScore() {
 function saveAndExit() {
   saveCurrentScore();
   localStorage.setItem('savedProgress24', JSON.stringify({
-    name: playerName, score: score, streak: streak, diff: currentDiff
+    name: playerName, score: score, streak: streak, diff: currentDiff,
+    puzzle: current, timeLeft: timeLeft
   }));
   clearInterval(timerInterval); stopUrgent();
   score=0; streak=0;
@@ -649,18 +652,37 @@ function continueGame() {
   try { saved=JSON.parse(localStorage.getItem('savedProgress24')); } catch {}
   if(!saved) return;
   playerName=saved.name;
-  score=saved.score||0;
-  streak=saved.streak||0;
   localStorage.removeItem('savedProgress24');
   document.getElementById('nameScreen').style.display='none';
   document.getElementById('gameScreen').style.display='block';
   document.getElementById('playerNameEl').textContent=playerName;
   document.getElementById('avatarEl').textContent=playerName[0].toUpperCase();
-  setDiff(saved.diff||'easy');
-  score=saved.score||0;
-  streak=saved.streak||0;
+  // Set difficulty tabs without resetting score
+  currentDiff=saved.diff||'easy';
+  ['easy','medium','hard'].forEach(k=>{
+    document.getElementById('tab-'+k).className='tab'+(k===currentDiff?' active-'+k:'');
+  });
+  timerMax=currentDiff==='easy'?150:currentDiff==='medium'?120:90;
+  score=saved.score||0; streak=saved.streak||0;
   document.getElementById('scoreNum').textContent=score;
   document.getElementById('streakNum').textContent=streak;
+  updateBestDisplay();
+  // Restore puzzle and remaining time
+  if(saved.puzzle){
+    current=saved.puzzle;
+    document.querySelector('.btn-save-exit').disabled=false;
+    render();
+    clearInterval(timerInterval); stopUrgent();
+    timeLeft=saved.timeLeft||timerMax;
+    setTimerDisplay(timeLeft);
+    timerInterval=setInterval(()=>{
+      timeLeft--; setTimerDisplay(timeLeft);
+      if(timeLeft===Math.floor(timerMax*0.2)) startUrgent();
+      if(timeLeft<=0){ clearInterval(timerInterval); onTimeout(); }
+    },1000);
+  } else {
+    next();
+  }
 }
 
 // ── Difficulty ─────────────────────────────────────────
@@ -707,6 +729,7 @@ function onTimeout() {
     c.classList.remove('win','urgent','used'); c.classList.add('timeout');
   });
   playSad(); inputLocked=true; renderTokens();
+  document.querySelector('.btn-save-exit').disabled=true;
 }
 
 // ── Solver ─────────────────────────────────────────────
@@ -898,6 +921,7 @@ function next() {
   }
   let idx=Math.floor(Math.random()*arr.length);
   current=arr.splice(idx,1)[0];
+  document.querySelector('.btn-save-exit').disabled=false;
   render(); startTimer();
 }
 
@@ -972,7 +996,8 @@ function openLeaderboard() {
           if(v&&typeof v.score==='number'&&v.score>0) rows.push(v);
         });
         rows.sort((a,b)=>b.score-a.score);
-        lbCache[d]=rows.slice(0,10);
+        lbFull[d]=rows;
+        lbCache[d]=rows.slice(0,30);
         if(lbDiff===d) renderLB();
         if(typeof currentDiff!=='undefined'&&currentDiff===d) updateBestDisplay();
       });
@@ -992,14 +1017,28 @@ function renderLB(){
   let list=document.getElementById('lbList');
   let medals=['🥇','🥈','🥉'];
   if(!scores.length){ list.innerHTML='<div class="lb-empty">No scores yet — be the first! 🎯</div>'; return; }
-  list.innerHTML=scores.map((e,i)=>{
-    let you=normName(e.name)===normName(playerName);
+  let myKey=normName(playerName);
+  let html=scores.map((e,i)=>{
+    let you=normName(e.name)===myKey;
     return `<div class="lb-row${you?' lb-you':''}">
-      <span class="lb-rank">${medals[i]||i+1}</span>
+      <span class="lb-rank">${medals[i]||'#'+(i+1)}</span>
       <span class="lb-name">${e.name}${you?' <span style="font-size:11px;color:#2196F3">(you)</span>':''}</span>
       <span class="lb-score">${e.score}</span>
     </div>`;
   }).join('');
+  // Show player rank if outside top 30
+  let full=lbFull[lbDiff]||[];
+  let myRank=full.findIndex(e=>normName(e.name)===myKey);
+  if(myRank>=30){
+    let me=full[myRank];
+    html+=`<div style="text-align:center;color:#aaa;padding:2px 0;font-size:12px">· · ·</div>
+    <div class="lb-row lb-you">
+      <span class="lb-rank">#${myRank+1}</span>
+      <span class="lb-name">${me.name} <span style="font-size:11px;color:#2196F3">(you)</span></span>
+      <span class="lb-score">${me.score}</span>
+    </div>`;
+  }
+  list.innerHTML=html;
 }
 document.getElementById('lbModal').addEventListener('click',e=>{
   if(e.target===document.getElementById('lbModal')) closeLeaderboard();
@@ -1057,7 +1096,8 @@ checkSavedProgress();
         if(v && typeof v.score === 'number' && v.score > 0) rows.push(v);
       });
       rows.sort((a,b) => b.score - a.score);
-      lbCache[d] = rows.slice(0,10);
+      lbFull[d] = rows;
+      lbCache[d] = rows.slice(0,30);
       if(typeof lbDiff !== 'undefined' && lbDiff === d) renderLB();
       if(typeof currentDiff !== 'undefined' && currentDiff === d) updateBestDisplay();
     });
