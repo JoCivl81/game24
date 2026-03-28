@@ -302,6 +302,7 @@ body {
     <input id="nameInput" placeholder="Enter your name to start" maxlength="20"
            onkeydown="if(event.key==='Enter') startGame()">
     <button class="btn-start" onclick="startGame()">Let's Play →</button>
+    <p id="playerCountDisplay" style="color:#aaa;font-size:13px;margin-top:4px;">👥 ...</p>
   </div>
 
   <!-- Game Screen -->
@@ -529,24 +530,35 @@ function stopUrgent() {
 
 // ── Storage (case-insensitive name key) ───────────────
 function normName(n) { return n.trim().toLowerCase(); }
-function loadLB() { try { return JSON.parse(localStorage.getItem('lb24pro')||'{}'); } catch { return {}; } }
-function saveLB(lb) { localStorage.setItem('lb24pro', JSON.stringify(lb)); }
+// ── Leaderboard helpers (Firebase) ─────────────────────
+// lbCache stores top scores per difficulty, kept in sync via Firebase listeners
+let lbCache = { easy:[], medium:[], hard:[] };
 
-function getTopScores(d) {
-  return (loadLB()[d]||[]).sort((a,b)=>b.score-a.score).slice(0,10);
+// Firebase key: lowercase, replace chars not allowed in Firebase keys
+function fbKey(name) {
+  return name.trim().toLowerCase().replace(/[.#$\/\[\]\s]/g,'_').slice(0,64);
 }
+
+function getTopScores(d) { return lbCache[d] || []; }
+
 function getPersonalBest(name,d) {
-  let key=normName(name);
-  return (loadLB()[d]||[]).find(e=>normName(e.name)===key)?.score||0;
+  let key=fbKey(name);
+  return lbCache[d].find(e=>fbKey(e.name)===key)?.score||0;
 }
+
 function submitScore(name,d,s) {
-  let lb=loadLB(); if(!lb[d]) lb[d]=[];
-  let key=normName(name);
-  let ex=lb[d].find(e=>normName(e.name)===key);
-  let isNew=false;
-  if(!ex){ lb[d].push({name:name.trim(),score:s}); isNew=true; }
-  else if(s>ex.score){ ex.score=s; isNew=true; }
-  saveLB(lb); return isNew;
+  let prev=getPersonalBest(name,d);
+  if(s<=prev) return false;
+  // Write to Firebase — transaction ensures only higher score is kept
+  let key=fbKey(name);
+  // lbRef is defined in Firebase block below
+  if(typeof lbRef!=='undefined') {
+    lbRef.child(d).child(key).transaction(cur=>{
+      if(!cur||s>(cur.score||0)) return { name:name.trim(), score:s };
+      return cur; // abort if existing score is higher
+    });
+  }
+  return true;
 }
 
 // ── Name / Player ──────────────────────────────────────
@@ -554,6 +566,7 @@ function startGame() {
   let n=document.getElementById('nameInput').value.trim();
   if(!n){ document.getElementById('nameInput').focus(); return; }
   playerName=n;
+  if(typeof incrementPlayerCount === 'function') incrementPlayerCount();
   document.getElementById('nameScreen').style.display='none';
   document.getElementById('gameScreen').style.display='block';
   document.getElementById('playerNameEl').textContent=n;
@@ -706,7 +719,14 @@ function renderTokens() {
         if(inputLocked) return;
         playClick();
         // move cursor to after this token
-        cursorPos=i+1;
+          let rect = chip.getBoundingClientRect();
+          let clickX = e.clientX - rect.left;
+
+          if (clickX < rect.width / 2) {
+             cursorPos = i;       // ซ้าย → ก่อน token
+          } else {
+            cursorPos = i + 1;   // ขวา → หลัง token
+          }
         renderTokens();
       });
       frag.appendChild(chip);
@@ -732,6 +752,10 @@ function insertNum(idx) {
   if(inputLocked) return;
   let used = usedNumIndices();
   if(used.has(idx)) return;
+  // Prevent number placed directly adjacent to another number (would form 2-digit number)
+  let prevTok = tokens[cursorPos - 1];
+  let nextTok = tokens[cursorPos];
+  if((prevTok && prevTok.type === 'num') || (nextTok && nextTok.type === 'num')) return;
   playClick();
   let n=current.nums[idx];
   tokens.splice(cursorPos, 0, { display:String(n), eval:String(n), type:'num', numIdx:idx });
@@ -895,6 +919,51 @@ document.querySelectorAll('.op-btn').forEach(btn=>{
 // ── Init ───────────────────────────────────────────────
 generatePool();
 document.getElementById('nameInput').focus();
+</script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA58vTba3xUp7hicAhlJyjeao0S0L2CVuc",
+    authDomain: "game24pro-9c3f6.firebaseapp.com",
+    databaseURL: "https://game24pro-9c3f6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "game24pro-9c3f6",
+    storageBucket: "game24pro-9c3f6.firebasestorage.app",
+    messagingSenderId: "299216879494",
+    appId: "1:299216879494:web:5fb924494ed37ef10f7607",
+    measurementId: "G-0V8YFNW700"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const countRef = db.ref('playerCount');
+  const lbRef = db.ref('leaderboard');
+
+  // Read & display current count on load
+  countRef.on('value', snap => {
+    let count = snap.val() || 0;
+    document.getElementById('playerCountDisplay').textContent = '👥 ' + count.toLocaleString() + ' players have played';
+  });
+
+  // Increment once per browser session
+  function incrementPlayerCount() {
+    if (sessionStorage.getItem('counted')) return;
+    countRef.transaction(cur => (cur || 0) + 1);
+    sessionStorage.setItem('counted', '1');
+  }
+
+  // Sync leaderboard cache from Firebase (real-time)
+  ['easy','medium','hard'].forEach(d => {
+    lbRef.child(d).orderByChild('score').limitToLast(10).on('value', snap => {
+      let rows = [];
+      snap.forEach(child => rows.push(child.val()));
+      lbCache[d] = rows.sort((a,b) => b.score - a.score);
+      // Refresh UI if leaderboard modal is open on this tab
+      if(typeof lbDiff !== 'undefined' && lbDiff === d) renderLB();
+      if(typeof currentDiff !== 'undefined' && currentDiff === d) updateBestDisplay();
+    });
+  });
 </script>
 </body>
 </html>
