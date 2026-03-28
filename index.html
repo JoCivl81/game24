@@ -962,6 +962,17 @@ function openLeaderboard() {
   saveCurrentScore(); updateBestDisplay();
   document.getElementById('lbModal').classList.add('open');
   setLbDiff(currentDiff);
+  // Force fresh fetch from Firebase
+  if(typeof lbRef!=='undefined'){
+    ['easy','medium','hard'].forEach(d=>{
+      lbRef.child(d).orderByChild('score').limitToLast(10).once('value', snap=>{
+        let rows=[];
+        snap.forEach(child=>rows.push(child.val()));
+        lbCache[d]=rows.filter(e=>e&&e.score).sort((a,b)=>b.score-a.score);
+        if(lbDiff===d) renderLB();
+      });
+    });
+  }
 }
 function closeLeaderboard(){ document.getElementById('lbModal').classList.remove('open'); }
 function setLbDiff(d){
